@@ -1,0 +1,29 @@
+deg2<- read.table("119606_RRA.txt", header = T, row.names = 1,)
+head(deg2)
+deg3<-read.table("128940_RRA.txt",header = T,row.names = 1, )
+head(deg3)
+deg4<-read.table("152250_RRA.txt",header = T,row.names = 1,)
+head(deg4)
+
+get_up <- function(df){
+  df$g=ifelse(df$P.Value>0.05,'stable', #If judgment: if the P.Value of this gene is>0.01, it is stable gene
+              ifelse( df$logFC >1,'up',#Then the sentence else: Next, start to judge those genes with P.Value<0.05, and then if judge: if logFC>1, it is up gene
+                      ifelse( df$logFC < -1,'down','stable') )#The sentence else follows: Next, judge the genes with logFC<-1, and then if judge: if logFC<-1, it is the down gene, otherwise it is the stable gene
+  )
+  print( table(df$g))
+  df=df[order(df$logFC,decreasing = T),]  ###decreasing should be removed when the gene is down regulated
+  rownames(df[df$g=='up','gene'])          ###Don't forget to change up to down
+  df[df$g=='up','gene']
+}
+
+
+library(RobustRankAggreg)
+glist=list(get_up(deg2)
+           ,get_up(deg3)
+           , get_up(deg4))
+glist
+ups=aggregateRanks(glist = glist, N = length(unique(unlist(glist))))
+tmp=as.data.frame(table(unlist(glist)))
+ups$Freq=tmp[match(ups$Name,tmp[,1]),2]
+head(ups)
+write.table(ups, file="./RRA_up.txt", quote = F)

@@ -1,0 +1,12 @@
+library(psych)
+library(corrplot)
+states<-read.table("linc_mRNA_GO.txt", header = T, row.names = 1)
+states
+corr.test(states, use = "complete", method = "pearson", adjust = "none")
+
+res <- corr.test(states, use = "complete", method = "pearson", adjust = "none")
+res$r
+res$ci
+
+write.table(res$r, file="pearson_r_linc_mRNA_GO.txt", quote = F)  
+write.table(res$ci, file="pearson_ci_linc_mRNA_GO.txt", quote = F) 
